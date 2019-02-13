@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -39,10 +38,10 @@ startcsv=0
 endcsv=299
 interval=5##every 25 frames, each file has 5 frames
 rangenum=np.arange(startcsv,endcsv)
-initialframes=30
+initialframes=12
 timestamps=pd.DataFrame()
 ########################################################################################
-## start with saving images every 30 seconds for 30frames
+## start with saving images for 1 hour
 ########################################################################################
 starting=str(datetime.datetime.now())
 for i in np.arange(initialframes):
@@ -50,23 +49,23 @@ for i in np.arange(initialframes):
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    tifffile.imsave(placesave+"/img_00000{}_Default_000.tif".format(f))
+    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f))
 #    plt.imsave(foldersave+"/frame{}".format(i),img)
-    time.sleep(30)##save image every 30 seconds
+    time.sleep(300)##save image every 5 minutes 
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
-    timestamps=timestamps.append(threeDposition,ignore_index=True)
+    timestamps=timestamps.append(timestamp,ignore_index=True)
 ########################################################################################
 ## start with adaptive image c apture
 ########################################################################################
-infiniteframes=50000
-for i in np.arange(initialframes,infiniteframes): 
+maxframes=5000
+for i in np.arange(initialframes,maxframes): 
     f="{04d}".format(i)
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    tifffile.imsave(placesave+"/img_00000{}_Default_000.tif".format(f))
+    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f))
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
-    timestamps=timestamps.append(threeDposition,ignore_index=True)
+    timestamps=timestamps.append(timestamp,ignore_index=True)
     current=placeread.format(i)
     if os.path.exists(current)==False:
         time.sleep(1200)#give enough time to make sure that the file exist
@@ -74,17 +73,22 @@ for i in np.arange(initialframes,infiniteframes):
     else:
         currentfile=pd.read_csv(current)
         currentporosity=np.average(np.array(currentfile.porosity))
-        if currentporosity <= 2:
-            time.sleep(150)##capture only every 5 minutes for no activity
-        elif (currentporosity >=2 and currentporosity <10):
-            time.sleep(10)##capture every 1 seconds + overhead
+        if currentporosity <= 1.5:
+            time.sleep(300)##capture only every 5 minutes for no activity
+        elif (currentporosity >=1.5 and currentporosity <5):
+            time.sleep(10)##capture every 10 seconds + overhead, for 3 hours its 1000 frames
+        elif (currentporosity >=5 and currentporosity <10):
+            time.sleep(30)##capture every 1 seconds + overhead, for 3 hours its 360 frames
         elif (currentporosity >=10 and currentporosity <15 ):
-            time.sleep(30)
-        elif (currentporosity>=15 and < 32):
-            time.sleep(300)##capture only every 10 minutes 
-        elif (currentporosity >= 32):
+            time.sleep(120)##every minute , 120 frames for 4 hours
+        elif (currentporosity >=15 and currentporosity <20 ):
+            time.sleep(300)##capture only every 5minutes 
+        elif (currentporosity >=20 and currentporosity <33 ):
+            time.sleep(600)##capture only every 10minutes 
+        elif (currentporosity >= 33):
             break
     
     
             
 timestamps.to_csv(foldersave+"/"+starting+"timestamp.csv")
+
