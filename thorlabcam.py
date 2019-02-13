@@ -11,14 +11,14 @@ Created on Wed Feb 13 14:52:30 2019
 
 #Environment setup instructions: https://micro-manager.org/wiki/Using_the_Micro-Manager_python_library
 #import MMCorePy #load MicroManager for device control
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import time
 import pandas as pd
 import numpy as np
 import os
 import argparse
 import datetime
-
+import tifffile
 ########################################################################################
 ## load the varaibles from argument parser
 ########################################################################################
@@ -34,6 +34,7 @@ mmc = MMCorePy.CMMCore()
 mmc.loadDevice('Camera', 'ThorlabsUSBCamera', 'ThorCam')
 mmc.initializeAllDevices()
 mmc.setCameraDevice('Camera')
+mmc.setExposure(40)##set exposure rate in ms
 startcsv=0
 endcsv=299
 interval=5##every 25 frames, each file has 5 frames
@@ -45,11 +46,12 @@ timestamps=pd.DataFrame()
 ########################################################################################
 starting=str(datetime.datetime.now())
 for i in np.arange(initialframes):
-    mmc.setExposure(40) #ms
+    f="{04d}".format(i)
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    plt.imsave(foldersave+"/frame{}".format(i),img)
+    tifffile.imsave(placesave+"/img_00000{}_Default_000.tif".format(f))
+#    plt.imsave(foldersave+"/frame{}".format(i),img)
     time.sleep(30)##save image every 30 seconds
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
     timestamps=timestamps.append(threeDposition,ignore_index=True)
@@ -57,12 +59,12 @@ for i in np.arange(initialframes):
 ## start with adaptive image c apture
 ########################################################################################
 infiniteframes=50000
-for i in np.arange(infiniteframes): 
-    mmc.setExposure(40) #ms
+for i in np.arange(initialframes,infiniteframes): 
+    f="{04d}".format(i)
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    plt.imsave(foldersave+"/frame{}".format(i),img)
+    tifffile.imsave(placesave+"/img_00000{}_Default_000.tif".format(f))
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
     timestamps=timestamps.append(threeDposition,ignore_index=True)
     current=placeread.format(i)
