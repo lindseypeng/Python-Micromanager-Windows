@@ -49,7 +49,7 @@ for i in np.arange(initialframes):
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f))
+    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f),img)
 #    plt.imsave(foldersave+"/frame{}".format(i),img)
     time.sleep(300)##save image every 5 minutes 
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
@@ -63,7 +63,7 @@ for i in np.arange(initialframes,maxframes):
     mmc.snapImage()
     img = mmc.getImage() #this is numpy array, by the way
     now = time.time()
-    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f))
+    tifffile.imsave(foldersave+"/img_00000{}_Default_000.tif".format(f),img)
     timestamp=pd.DataFrame( {'frame':i,'elapsedtime(s)':now},index=[str(i)])
     timestamps=timestamps.append(timestamp,ignore_index=True)
     current=placeread.format(i)
